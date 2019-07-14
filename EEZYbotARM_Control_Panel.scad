@@ -1,19 +1,20 @@
 $fn = 50;               // 50 facets per circle
 
-font1 = "Liberation Sans";
+Font1    = "Liberation Sans";
+FontSize = 4;
 
 // all dimensions in mm
 
-PanelW = 100;
+PanelW = 130;
 PanelH = 40;
 PanelT = 3;
 
 PanelA = 30;            // tilt of panel with potentiometers on it
 
-PotHoleD  = 25.4*.26;   // 1/4" + a little extra
+PotHoleD  = 25.4*.260;   // 1/4" + a little extra
 PotOffset = 15;         // offset from bottom of pot panel
 
-TextExt    = 2;         // text extrusion thickness
+TextExt    = 1;         // text extrusion thickness
 TextOffset = 30;        // offset from bottom of pot panel
 
 union() {
@@ -43,22 +44,34 @@ union() {
                 translate([80, PotOffset, 0]) {
                     cylinder(d = PotHoleD, h = PanelT);
                 }
+                translate([110, PotOffset, 0]) {
+                    cylinder(d = PotHoleD, h = PanelT);
+                }
         
                 // place text for each pot
     
-                translate ([9, TextOffset, PanelT - TextExt]) {
+                translate ([13, TextOffset, PanelT - TextExt]) {
                     linear_extrude(height = TextExt) {
-                        text("TURN", font = font1, size = 6, direction = "ltr", spacing = 1 );
+                        text("TURN", font = Font1, size = FontSize,
+                             direction = "ltr", spacing = 1 );
                     }
                 }
-                translate ([41.5, TextOffset, PanelT - TextExt]) {
+                translate ([40, TextOffset, PanelT - TextExt]) {
                     linear_extrude(height = TextExt) {
-                        text("ARM", font = font1, size = 6, direction = "ltr", spacing = 1 );
+                        text("HEIGHT", font = Font1, size = FontSize,
+                             direction = "ltr", spacing = 1 );
                     }
                 }
-                translate ([69, TextOffset, PanelT - TextExt]) {
+                translate ([70.5, TextOffset, PanelT - TextExt]) {
                     linear_extrude(height = TextExt) {
-                        text("CLAW", font = font1, size = 6, direction = "ltr", spacing = 1 );
+                        text("REACH", font = Font1, size = FontSize,
+                             direction = "ltr", spacing = 1 );
+                    }
+                }
+                translate ([101.5, TextOffset, PanelT - TextExt]) {
+                    linear_extrude(height = TextExt) {
+                        text("CLAW", font = Font1, size = FontSize,
+                             direction = "ltr", spacing = 1 );
                     }
                 }
             }
