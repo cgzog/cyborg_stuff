@@ -4,8 +4,7 @@
 
 #include <LiquidCrystal.h>
 
-
-#define SPLASH_SCREEN_DELAY   2000        // in milliseconds
+#include "defines.h"
 
 
 void ExecuteMenu(void *);
@@ -13,16 +12,6 @@ void ExecuteMenu(void *);
 
 // select the pins used on the LCD panel
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-
-
-// constants returned from button presses
-
-#define BTN_RIGHT  0
-#define BTN_UP     1
-#define BTN_DOWN   2
-#define BTN_LEFT   3
-#define BTN_SELECT 4
-#define BTN_NONE   999
 
 
 //  button analog values (determined through reading them from an actual board
@@ -73,10 +62,10 @@ BUTTON_MATRIX ButtonMatrix[] = {
 //
 //  these values might not be exact from board to board so we shouldn't count on them being some exact
 //  value and instead allow some variance in the values.  we do this by allowing values to vary by
-//  up to 50 (if we're expecting 100, we allow the value to be up to 150).
+//  up to SENSOR_TOLERANCE (if we're expecting 100, we allow the value to be up to 100 + SENSOR_TOLERANCE).
 //
 //  by checking starting at the low end through a series of if() statements, we can step through the values
-//  one at a time and return the first one that passes our criteria
+//  one at a time and return the first one that sits in the range of a valid button
 
 int ReadLcdButtons() {
   int  adcValue, i;
@@ -87,28 +76,52 @@ int ReadLcdButtons() {
 
   for (i = 0 ; i < (sizeof(ButtonMatrix) / sizeof(ButtonMatrix[0])) ; i++) {
     if (adcValue >= ButtonMatrix[i].buttonLow && adcValue <= ButtonMatrix[i].buttonHigh) {
+        delay(BUTTON_DEBOUNCE);
         return ButtonMatrix[i].buttonReturn;
     }
   }
 
-  return BTN_NONE;  // not within any button ranges
+  delay(BUTTON_DEBOUNCE);
+  return BTN_NONE;              // not within any button ranges
 }
 
 
 
 
 typedef struct {
-  char  *selection;               // text to display - pad with spaces at the start
+  char  *text;                    // text to display - pad with spaces at the start and enough
+                                  // at end to clear other selections
                                   // NULL indicates ends of selections
-  int   button;                   // this button controls the function to be called
   void  (*func)(void *);          // call this function if selected - could be any function
+  void  *param;                   // parameter to pass to function
 } MENU_SELECTION;
 
 typedef struct {
-  char            *menuText;      // shown on the top line - pad with spaces at the start
+  char            *text;      // shown on the top line - pad with spaces at the start
                                   // NULL indicates end of menus
   MENU_SELECTION  selections[];   // 
 } MENU;
+
+extern MENU MainMenu;
+
+MENU AnalogMenu = {
+  "Analog Display:", { { "    ABSOLUTE >   ", ExecuteMenu, &MainMenu }, 
+                       { " < PERCENTAGE >  ", ExecuteMenu, &MainMenu },
+                       { "   < SCALED      ", ExecuteMenu, &MainMenu },
+                       { NULL, NULL, NULL} }
+};
+
+MENU DigitalMenu = {
+  "  Sensor Type:", { { "      READ >      ", ExecuteMenu, &MainMenu }, 
+                      { "   <  WRITE       ", ExecuteMenu, &MainMenu },
+                      { NULL, NULL, NULL} }
+};
+
+MENU MainMenu = {
+  "  Sensor Type:", { { "     ANALOG >     ", ExecuteMenu, &AnalogMenu }, 
+                      { "   < DIGITAL      ", ExecuteMenu, &DigitalMenu },
+                      { NULL, NULL, NULL} }
+};
 
 
 
@@ -117,23 +130,49 @@ typedef struct {
 //  run that menu and call other routines based on what gets selected
 
 void ExecuteMenu(void *menu) {
-int button;
+  
+int button, menuSelection;
 
-    lcd.clear();
-    
-    lcd.setCursor(0, 0);                        // start at the first character of the first line
+  lcd.clear();
+  lcd.setCursor(0, 0);                            // start at the first character of the first line
+  lcd.print(((MENU *)menu)->text);                // display the top line
 
-    lcd.print(((MENU *)menu)[0].menuText);                // display the top line
+  menuSelection = 0;                              // start with the first menu selection
 
-    lcd.setCursor(0, 1);                        // position at the start of the second line
+  while (1) {                                     // loop until we find something
 
-    lcd.print(((MENU *)menu)[0].selections[0].selection); // display the first selection
+    lcd.setCursor(0, 1);                          // position at the start of the second line
+    lcd.print(((MENU *)menu)->selections[menuSelection].text);  // display the current selection
 
-    while ((button = ReadLcdButtons()) == BTN_NONE) {
-      // spin until there is a button
+    if ((button = ReadLcdButtons()) != BTN_NONE) {
+      
+      // has the current item been selected?
+      if (button == BTN_SELECT) {
+        ((MENU *)menu)->selections[menuSelection].func(((MENU *)menu)->selections[menuSelection].param);
+      }
+
+#ifdef  DEBUG
+      Serial.println(menuSelection);
+#endif
+      // otherwise see if we have something to change in regards to the displayed menu item
+      switch (button) {
+
+        case BTN_LEFT:
+                        // check to see if we'd go before the first item
+                        if (menuSelection > 0) {
+                          menuSelection--;
+                        }
+                        break;
+
+        case BTN_RIGHT:
+                        //check to see if we'd go past the last item
+                        if (((MENU *)menu)->selections[menuSelection].text != NULL) {
+                          menuSelection++;
+                        }
+                        break;
+      }
     }
-
-    
+  }
 }
 
 
@@ -145,9 +184,9 @@ int button;
 
 
 void setup() {
-  
+
+  Serial.begin(SERIAL_SPEED);   // in case we want it for debugging...
   lcd.begin(16, 2);
-  
   lcd.setCursor(1,0);           // display the splash screen
   lcd.print("SENSOR TESTER");
   lcd.setCursor(1, 1);
@@ -161,7 +200,10 @@ void setup() {
 //  us to the main loop
 
 void loop() {
+
+  ExecuteMenu(&MainMenu);
   
+/*  
   int button;
 
   lcd.clear();        // start clean
@@ -201,6 +243,7 @@ void loop() {
     case BTN_NONE:
       lcd.print(" NONE  ");
       break;
+    }
   }
-  }
+  */
 }
