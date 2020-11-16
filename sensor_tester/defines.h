@@ -17,7 +17,7 @@
 #define BTN_SELECT 4
 #define BTN_NONE   999
 
-#define BUTTON_DEBOUNCE       100         // wait this many ms between button reads
+#define BUTTON_DEBOUNCE       75          // wait this many ms between button reads
 
 
 #define SENSOR_ANALOG         0           // sensor type
