@@ -16,46 +16,47 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 extern MENU mainMenu;       // needed so we can do forward referencing due to how the menus intertwine
 
 MENU analogScaledMenu = {
-  " Scaled Range:  ", { { "   Set Lower >   ", ExecuteMenu, &mainMenu }, 
-                       { " < Set Upper     ", ExecuteMenu, &mainMenu },
-                       { NULL, NULL, NULL} }
+  " Scaled Range:  ", { { "   Set Lower >  ", AdjustScale, (void *)ADJUST_LOWER_SCALE }, 
+                        { "   < Execute >  ", ReadA2d,     (void *)SENSOR_ANALOG_SCALED },
+                        { "   < Set Upper  ", AdjustScale, (void *)ADJUST_UPPER_SCALE },
+                        { NULL, NULL, NULL } }
 };
 
 MENU analogMenu = {
-  "Analog Display: ", { { "    ABSOLUTE >   ", ExecuteMenu, &mainMenu }, 
-                       { " < PERCENTAGE >  ", ExecuteMenu, &mainMenu },
-                       { "   < SCALED      ", ExecuteMenu, &analogScaledMenu },
-                       { NULL, NULL, NULL} }
+  "Analog Display: ", { { "    ABSOLUTE >  ", ReadA2d, (void *)SENSOR_ANALOG_ABS }, 
+                        { " < PERCENTAGE > ", ReadA2d, (void *)SENSOR_ANALOG_PERCENT },
+                        { "   < SCALED     ", ExecuteMenu, &analogScaledMenu },
+                        { NULL, NULL, NULL } }
 };
 
 MENU digitalPulseMenu = {
-  " Counting Edge: ", { { "   NEGATIVE >     ", ExecuteMenu, &mainMenu }, 
-                      { "   <  POSITIVE    ", ExecuteMenu, &mainMenu },
-                      { NULL, NULL, NULL} }
+  " Counting Edge: ", { { "   NEGATIVE >   ", ExecuteMenu, &mainMenu }, 
+                        { "   <  POSITIVE  ", ExecuteMenu, &mainMenu },
+                        { NULL, NULL, NULL } }
 };
 
 MENU digitalInMenu = {
-  " Digital Read:  ", { { "      STATE >      ", ExecuteMenu, &mainMenu }, 
-                      { "  < PULSE COUNT    ", ExecuteMenu, &digitalPulseMenu },
-                      { NULL, NULL, NULL} }
+  " Digital Read:  ", { { "     STATE >    ", ExecuteMenu, &mainMenu }, 
+                        { "  < PULSE COUNT ", ExecuteMenu, &digitalPulseMenu },
+                        { NULL, NULL, NULL } }
 };
 
 MENU digitalOutMenu = {
-  " Digital Write: ", { { "      HIGH >      ", ExecuteMenu, &mainMenu }, 
-                      { "    <  LOW        ", ExecuteMenu, &mainMenu },
-                      { NULL, NULL, NULL} }
+  " Digital Write: ", { { "      HIGH >    ", ExecuteMenu, &mainMenu }, 
+                        { "    <  LOW      ", ExecuteMenu, &mainMenu },
+                        { NULL, NULL, NULL } }
 };
 
 MENU digitalMenu = {
-  "  Sensor Type:  ", { { "      READ >      ", ExecuteMenu, &digitalInMenu }, 
-                      { "   <  WRITE       ", ExecuteMenu, &digitalOutMenu },
-                      { NULL, NULL, NULL} }
+  "  Sensor Type:  ", { { "      READ >    ", ExecuteMenu, &digitalInMenu }, 
+                        { "   <  WRITE     ", ExecuteMenu, &digitalOutMenu },
+                        { NULL, NULL, NULL } }
 };
 
 MENU mainMenu = {
-  "  Sensor Type:  ", { { "     ANALOG >     ", ExecuteMenu, &analogMenu }, 
-                      { "   < DIGITAL      ", ExecuteMenu, &digitalMenu },
-                      { NULL, NULL, NULL} }
+  "  Sensor Type:  ", { { "     ANALOG >   ", ExecuteMenu, &analogMenu }, 
+                        { "   < DIGITAL    ", ExecuteMenu, &digitalMenu },
+                        { NULL, NULL, NULL} }
 };
 
 
