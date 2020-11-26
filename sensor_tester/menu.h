@@ -3,8 +3,18 @@
 
 void  ExecuteMenu(void *);
 
+
 void  ReadA2d(void *);
 void  AdjustScale(void *);
+
+void  WriteDigital(void *);
+
+void  ReadDigitalState(void *);
+void  ReadDigitalCount(void *);
+
+
+#define DISABLE_UP        0
+#define ENABLE_UP         1
 
 
 typedef struct {
@@ -18,5 +28,6 @@ typedef struct {
 typedef struct {
   const char      *text;          // shown on the top line - pad with spaces at the start
                                   // NULL indicates end of menus
+  const char      enableUp;       // UP button returns to previous menu
   MENU_SELECTION  selections[];   // 
 } MENU;

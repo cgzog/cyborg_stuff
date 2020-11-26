@@ -5,6 +5,10 @@
 #define ANALOG_READ_PORT      A5
 #define ANALOG_FULL_SCALE     1023        // max analog read value
 
+#define DIGITAL_PORT          2          // read or write all happens here
+#define DIG_READ_NEG_PULSES   0
+#define DIG_READ_POS_PULSES   1
+
 
 #define DEF_HIGH_SCALE        500
 #define DEF_LOW_SCALE         0
@@ -17,6 +21,10 @@
 
 
 #define DATA_READ_DELAY       200         // ms delay between data reads
+
+
+#define UP_ARROW_CUSTOM_CHAR  1
+#define DOWN_ARROW_CUSTOM_CHAR 2
 
 
 #define SPLASH_SCREEN_DELAY   2000        // in milliseconds

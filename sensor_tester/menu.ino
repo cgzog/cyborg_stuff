@@ -26,9 +26,14 @@ int button, menuSelection;
       // has the current item been selected?
       if (button == BTN_SELECT) {
         ((MENU *)menu)->selections[menuSelection].func(((MENU *)menu)->selections[menuSelection].param);
+        
+        continue;                                 // back to the while()...
       }
 
 #ifdef  DEBUG
+      Serial.print("EM: key ");
+      Serial.println(menuSelection);
+      Serial.print("  ");
       Serial.println(menuSelection);
 #endif
       // otherwise see if we have something to change in regards to the displayed menu item
@@ -43,8 +48,15 @@ int button, menuSelection;
 
         case BTN_RIGHT:
                         //check to see if we'd go past the last item
-                        if (((MENU *)menu)->selections[menuSelection].text != NULL) {
+                        if (((MENU *)menu)->selections[menuSelection + 1].text != NULL) {
                           menuSelection++;
+                        }
+                        break;
+
+        case BTN_UP:
+                        // check to see if the UP button takes us back
+                        if (((MENU *)menu)->enableUp == ENABLE_UP) {
+                          return;
                         }
                         break;
       }

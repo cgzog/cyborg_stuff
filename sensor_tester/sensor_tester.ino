@@ -16,59 +16,86 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 extern MENU mainMenu;       // needed so we can do forward referencing due to how the menus intertwine
 
 MENU analogScaledMenu = {
-  " Scaled Range:  ", { { "   Set Lower >  ", AdjustScale, (void *)ADJUST_LOWER_SCALE }, 
-                        { "   < Execute >  ", ReadA2d,     (void *)SENSOR_ANALOG_SCALED },
-                        { "   < Set Upper  ", AdjustScale, (void *)ADJUST_UPPER_SCALE },
-                        { NULL, NULL, NULL } }
+  " Scaled Range:  ", ENABLE_UP,  { { "   Set Lower >  ", AdjustScale, (void *)ADJUST_LOWER_SCALE }, 
+                                    { "   < Execute >  ", ReadA2d,     (void *)SENSOR_ANALOG_SCALED },
+                                    { "   < Set Upper  ", AdjustScale, (void *)ADJUST_UPPER_SCALE },
+                                    { NULL, NULL, NULL } }
 };
 
 MENU analogMenu = {
-  "Analog Display: ", { { "    ABSOLUTE >  ", ReadA2d, (void *)SENSOR_ANALOG_ABS }, 
-                        { " < PERCENTAGE > ", ReadA2d, (void *)SENSOR_ANALOG_PERCENT },
-                        { "   < SCALED     ", ExecuteMenu, &analogScaledMenu },
-                        { NULL, NULL, NULL } }
+  "Analog Display: ", ENABLE_UP,  { { "    ABSOLUTE >  ", ReadA2d, (void *)SENSOR_ANALOG_ABS }, 
+                                    { " < PERCENTAGE > ", ReadA2d, (void *)SENSOR_ANALOG_PERCENT },
+                                    { "   < SCALED     ", ExecuteMenu, &analogScaledMenu },
+                                    { NULL, NULL, NULL } }
 };
 
 MENU digitalPulseMenu = {
-  " Counting Edge: ", { { "   NEGATIVE >   ", ExecuteMenu, &mainMenu }, 
-                        { "   <  POSITIVE  ", ExecuteMenu, &mainMenu },
-                        { NULL, NULL, NULL } }
+  " Counting Edge: ", ENABLE_UP,   { { "   NEGATIVE >   ", ReadDigitalCount, (void *)DIG_READ_NEG_PULSES }, 
+                                     { "   <  POSITIVE  ", ReadDigitalCount, (void *)DIG_READ_POS_PULSES },
+                                     { NULL, NULL, NULL } }
 };
 
 MENU digitalInMenu = {
-  " Digital Read:  ", { { "     STATE >    ", ExecuteMenu, &mainMenu }, 
-                        { "  < PULSE COUNT ", ExecuteMenu, &digitalPulseMenu },
-                        { NULL, NULL, NULL } }
+  " Digital Read:  ", ENABLE_UP,  { { "     STATE >    ", ReadDigitalState, (void *) NULL }, 
+                                    { "  < PULSE COUNT ", ExecuteMenu, &digitalPulseMenu },
+                                    { NULL, NULL, NULL } }
 };
 
 MENU digitalOutMenu = {
-  " Digital Write: ", { { "      HIGH >    ", ExecuteMenu, &mainMenu }, 
-                        { "    <  LOW      ", ExecuteMenu, &mainMenu },
-                        { NULL, NULL, NULL } }
+  " Digital Write: ", ENABLE_UP,  { { "      HIGH >    ", WriteDigital, (void *) 1 }, 
+                                    { "    <  LOW      ", WriteDigital, (void *) 0 },
+                                    { NULL, NULL, NULL } }
 };
 
 MENU digitalMenu = {
-  "  Sensor Type:  ", { { "      READ >    ", ExecuteMenu, &digitalInMenu }, 
-                        { "   <  WRITE     ", ExecuteMenu, &digitalOutMenu },
-                        { NULL, NULL, NULL } }
+  "  Sensor Type:  ", ENABLE_UP,  { { "      READ >    ", ExecuteMenu, &digitalInMenu }, 
+                                    { "   <  WRITE     ", ExecuteMenu, &digitalOutMenu },
+                                    { NULL, NULL, NULL } }
 };
 
 MENU mainMenu = {
-  "  Sensor Type:  ", { { "     ANALOG >   ", ExecuteMenu, &analogMenu }, 
-                        { "   < DIGITAL    ", ExecuteMenu, &digitalMenu },
-                        { NULL, NULL, NULL} }
+  "  Sensor Type:  ", DISABLE_UP, { { "     ANALOG >   ", ExecuteMenu, &analogMenu }, 
+                                    { "   < DIGITAL    ", ExecuteMenu, &digitalMenu },
+                                    { NULL, NULL, NULL} }
 };
 
+// custom characters
+
+byte upArrowChar[8] = {
+  B00000,
+  B00100,
+  B01110,
+  B10101,
+  B00100,
+  B00100,
+  B00100,
+  B00000,
+};
+
+byte downArrowChar[8] = {
+  B00000,
+  B00100,
+  B00100,
+  B00100,
+  B10101,
+  B01110,
+  B00100,
+  B00000,
+};
 
 void setup() {
 
   Serial.begin(SERIAL_SPEED);   // in case we want it for debugging...
-  
+
   lcd.begin(16, 2);
   lcd.setCursor(1,0);           // display the splash screen
   lcd.print("SENSOR TESTER");
   lcd.setCursor(1, 1);
   lcd.print("Joliet Cyborgs");
+
+  // set custom characters
+  lcd.createChar(UP_ARROW_CUSTOM_CHAR, upArrowChar);
+  lcd.createChar(DOWN_ARROW_CUSTOM_CHAR, downArrowChar);
 
   delay(SPLASH_SCREEN_DELAY);
 }
